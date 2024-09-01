@@ -4,8 +4,10 @@ import (
 	"log"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/mkostynskyi0797/go_news_scrape/config"
 	"github.com/mkostynskyi0797/go_news_scrape/database"
 	"github.com/mkostynskyi0797/go_news_scrape/model"
+
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
@@ -56,7 +58,7 @@ func CreateUser(c *fiber.Ctx) error {
 // GetSingleUser from db
 func GetSingleUser(c *fiber.Ctx) error {
 	email := c.Params("email")
-
+	log.Printf("Email: %v", config.Config("DB_HOST"))
 	user, err := GetUserByEmail(email)
 
 	if err != nil {
