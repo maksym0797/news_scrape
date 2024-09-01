@@ -1,0 +1,9 @@
+[package]
+name = "r_scraper"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+reqwest = { version = "0.11", features = ["blocking", "json"] }
+scraper = "0.14"
+tokio = { version = "1", features = ["full"] }
