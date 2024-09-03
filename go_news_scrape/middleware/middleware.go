@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"encoding/base64"
+	"log"
 	"strings"
 
 	"golang.org/x/crypto/bcrypt"
@@ -42,6 +43,8 @@ func BasicAuthMiddleware(c *fiber.Ctx) error {
 	if !checkPasswordHash(password, user.Password) {
 		return c.Status(fiber.StatusUnauthorized).SendString("Unauthorized")
 	}
+	log.Printf("User %s authenticated", user.ID.String())
+	c.Locals("userId", user.ID.String())
 
 	return c.Next()
 }

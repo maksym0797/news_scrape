@@ -81,6 +81,15 @@ func GetUserByEmail(email string) (model.User, error) {
 	return user, nil
 }
 
+func GetUserById(id string) (model.User, error) {
+	db := database.DB.Db
+	var user model.User
+	if err := db.Where("ID = ?", id).First(&user).Error; err != nil {
+		return user, err
+	}
+	return user, nil
+}
+
 // update a user in db
 func UpdateUser(c *fiber.Ctx) error {
 	db := database.DB.Db
@@ -94,9 +103,10 @@ func UpdateUser(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"status": "error", "message": "Invalid input", "data": err.Error()})
 	}
 
-	id := c.Params("id")
-	var user model.User
-	if err := db.First(&user, "id = ?", id).Error; err != nil {
+	id := c.Locals("userId").(string)
+	log.Printf("User ID: %v!", id)
+	user, err := GetUserById(id)
+	if err != nil {
 		if err == gorm.ErrRecordNotFound {
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"status": "error", "message": "User not found"})
 		}
