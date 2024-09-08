@@ -11,6 +11,8 @@ type Source struct {
 	Name         string    `json:"name"`
 	Link         string    `json:"link"`
 	SourceTypeID uuid.UUID `json:"source_type_id"`
+	UserId       uuid.UUID `json:"user_id"`
+	User         User      `json:"user" gorm:"foreignKey:UserId;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 	SourceType   SourceType
 }
 

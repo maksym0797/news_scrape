@@ -12,12 +12,14 @@ type User struct {
 	Username string    `json:"username"`
 	Email    string    `json:"email"`
 	Password string    `json:"password"`
+	Sources  []Source
 }
 
 type UserResponse struct {
 	ID       uuid.UUID `json:"id"`
 	Username string    `json:"username"`
 	Email    string    `json:"email"`
+	Sources  []Source  `json:"sources"`
 }
 
 // Users struct
@@ -37,5 +39,6 @@ func (user *User) ToUserResponse() UserResponse {
 		ID:       user.ID,
 		Username: user.Username,
 		Email:    user.Email,
+		Sources:  user.Sources,
 	}
 }

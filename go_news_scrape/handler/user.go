@@ -72,6 +72,20 @@ func GetSingleUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{"status": "success", "message": "User found", "data": user.ToUserResponse()})
 }
 
+func GetUserSources(c *fiber.Ctx) error {
+	db := database.DB.Db
+	user, err := GetUserById(c.Locals("userId").(string))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+	}
+
+	db.Model(&user).Association("Sources").Find(&user.Sources)
+
+	return c.Status(fiber.StatusOK).JSON(
+		user.Sources,
+	)
+}
+
 func GetUserByEmail(email string) (model.User, error) {
 	db := database.DB.Db
 	var user model.User
