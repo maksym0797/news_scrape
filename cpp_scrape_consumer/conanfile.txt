@@ -1,0 +1,14 @@
+[requires]
+libpq/15.5
+sqlpp11/0.64
+boost/1.86.0
+
+[generators]
+CMakeDeps
+CMakeToolchain
+
+[layout]
+cmake_layout
+
+[options]
+sqlpp11/*:BUILD_POSTGRESQL_CONNECTOR=ON 

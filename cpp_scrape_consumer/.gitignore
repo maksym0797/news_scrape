@@ -1,0 +1,9 @@
+.vscode/
+.idea/
+.cmake/
+CMakeFiles/
+build/
+main
+CMakeCache.txt
+.env
+.DS_Store
