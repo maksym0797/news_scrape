@@ -9,6 +9,11 @@ find_package(PostgreSQL REQUIRED)
 find_package(Boost REQUIRED)
 
 add_executable(main src/main.cpp)
+# Add source files from src/reader directory
+file(GLOB_RECURSE READER_SOURCES src/reader/*.{cpp,h})
+
+# Include the reader sources in the executable
+target_sources(main PRIVATE ${READER_SOURCES})
 target_link_libraries(main PRIVATE sqlpp11::sqlpp11)
 target_link_libraries(main PRIVATE PostgreSQL::PostgreSQL)
 target_link_libraries(main PRIVATE boost::boost)

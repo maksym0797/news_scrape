@@ -10,17 +10,7 @@
 #include <boost/uuid/string_generator.hpp> // For string_generator
 #include <boost/uuid/uuid_serialize.hpp>   // For string_generator
 #include <boost/uuid/uuid_io.hpp>          // For to_string
-
-struct Post
-{
-    boost::uuids::uuid ID;
-    std::string Title;
-    std::string Description;
-    boost::uuids::uuid SourceID;
-    std::string Link;
-    std::chrono::system_clock::time_point CreatedAt;
-    std::chrono::system_clock::time_point UpdatedAt;
-};
+#include "reader/input_reader.cpp"
 
 struct Source
 {
@@ -86,7 +76,7 @@ std::map<std::string, std::string> parseEnvFile(const std::string &filename)
 }
 int main()
 {
-    std::map<std::string, std::string> env = parseEnvFile(".env");
+    std::map<std::string, std::string> env = parseEnvFile("../../.env");
     cout << "DB_CONNINFO: " << env["DB_CONNINFO"] << endl;
     // Get the database connection string from the parsed environment variables
     const char *conninfo = env["DB_CONNINFO"].c_str();
@@ -100,40 +90,50 @@ int main()
     }
 
     cout << "Connected to database successfully!" << endl;
+
+    InputReaderDB reader(conn);
+
+    std::vector<InputPost> posts = reader.read();
+
     cout << "Hello, World!" << endl;
 
-    PGresult *res;
-
-    res = PQexec(conn, "SELECT * FROM sources");
-
-    int nFields = PQnfields(res);
-    int nRows = PQntuples(res);
-
-    cout << "We have " << nRows << " rows and " << nFields << " columns." << endl;
-    vector<Source> sources;
-    for (int i = 0; i < nRows; i++)
+    for (auto post : posts)
     {
-        Source source = {};
-        for (int j = 0; j < nFields; j++)
-        {
-            cout << PQfname(res, j) << ": " << PQgetvalue(res, i, j) << " | " << endl;
-            source.setField(PQfname(res, j), PQgetvalue(res, i, j));
-        }
-        sources.push_back(source);
-        cout << endl;
+        std::cout << "ID: " << boost::uuids::to_string(post.ID) << std::endl;
     }
 
-    for (auto source : sources)
-    {
-        cout << "ID: " << boost::uuids::to_string(source.ID) << endl;
-        cout << "Name: " << source.Name << endl;
-        cout << "Link: " << source.Link << endl;
-        cout << "Source Type ID: " << boost::uuids::to_string(source.SourceTypeID) << endl;
-        cout << "User ID: " << boost::uuids::to_string(source.UserId) << endl;
-        cout << endl;
-    }
+    // PGresult *res;
 
-    PQclear(res);
+    // res = PQexec(conn, "SELECT * FROM sources");
+
+    // int nFields = PQnfields(res);
+    // int nRows = PQntuples(res);
+
+    // cout << "We have " << nRows << " rows and " << nFields << " columns." << endl;
+    // vector<Source> sources;
+    // for (int i = 0; i < nRows; i++)
+    // {
+    //     Source source = {};
+    //     for (int j = 0; j < nFields; j++)
+    //     {
+    //         cout << PQfname(res, j) << ": " << PQgetvalue(res, i, j) << " | " << endl;
+    //         source.setField(PQfname(res, j), PQgetvalue(res, i, j));
+    //     }
+    //     sources.push_back(source);
+    //     cout << endl;
+    // }
+
+    // for (auto source : sources)
+    // {
+    //     cout << "ID: " << boost::uuids::to_string(source.ID) << endl;
+    //     cout << "Name: " << source.Name << endl;
+    //     cout << "Link: " << source.Link << endl;
+    //     cout << "Source Type ID: " << boost::uuids::to_string(source.SourceTypeID) << endl;
+    //     cout << "User ID: " << boost::uuids::to_string(source.UserId) << endl;
+    //     cout << endl;
+    // }
+
+    // PQclear(res);
     PQfinish(conn);
     return 0;
 }
