@@ -1,6 +1,6 @@
 module github.com/mkostynskyi0797/go_news_scrape
 
-go 1.23.0
+go 1.23
 
 require (
 	golang.org/x/text v0.17.0
