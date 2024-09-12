@@ -3,7 +3,7 @@
 mod parsing;
 mod web_driver;
 
-use parsing::html::parse_html;
+use parsing::parse_html;
 use reqwest::Error;
 use std::{fmt::Display, time::Duration};
 
