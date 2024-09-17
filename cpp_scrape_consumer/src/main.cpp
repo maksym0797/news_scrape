@@ -10,7 +10,10 @@
 #include <boost/uuid/string_generator.hpp> // For string_generator
 #include <boost/uuid/uuid_serialize.hpp>   // For string_generator
 #include <boost/uuid/uuid_io.hpp>          // For to_string
-#include "reader/input_reader.cpp"
+#include "reader/input_reader.h"
+#include "config/config.h"
+#include "http/http_client.h"
+#include "db/postgres_client.h"
 
 struct Source
 {
@@ -47,51 +50,15 @@ struct Source
 
 using namespace std;
 
-std::map<std::string, std::string> parseEnvFile(const std::string &filename)
-{
-    std::ifstream file(filename);
-
-    if (!file.is_open())
-    {
-        cerr << "Failed to open file: " << filename << endl;
-        return {};
-    }
-
-    std::map<std::string, std::string> envMap;
-    std::string line;
-
-    while (std::getline(file, line))
-    {
-        std::istringstream iss(line);
-        std::string key, value;
-        if (std::getline(iss, key, '=') && std::getline(iss, value))
-        {
-            envMap[key] = value;
-        }
-    }
-
-    file.close();
-
-    return envMap;
-}
 int main()
 {
-    std::map<std::string, std::string> env = parseEnvFile("../../.env");
-    cout << "DB_CONNINFO: " << env["DB_CONNINFO"] << endl;
-    // Get the database connection string from the parsed environment variables
-    const char *conninfo = env["DB_CONNINFO"].c_str();
-    PGconn *conn = PQconnectdb(conninfo);
+    Config config("../../.env");
+    config.init();
+    cout << "DB_CONNINFO: " << config.get("DB_CONNINFO") << endl;
 
-    if (PQstatus(conn) != CONNECTION_OK)
-    {
-        cerr << "Connection to database failed: " << PQerrorMessage(conn) << endl;
-        PQfinish(conn);
-        return 1;
-    }
+    PostgresClient client(config);
 
-    cout << "Connected to database successfully!" << endl;
-
-    InputReaderDB reader(conn);
+    InputReaderDB reader(client.getDbConnection());
 
     std::vector<InputPost> posts = reader.read();
 
@@ -102,38 +69,5 @@ int main()
         std::cout << "ID: " << boost::uuids::to_string(post.ID) << std::endl;
     }
 
-    // PGresult *res;
-
-    // res = PQexec(conn, "SELECT * FROM sources");
-
-    // int nFields = PQnfields(res);
-    // int nRows = PQntuples(res);
-
-    // cout << "We have " << nRows << " rows and " << nFields << " columns." << endl;
-    // vector<Source> sources;
-    // for (int i = 0; i < nRows; i++)
-    // {
-    //     Source source = {};
-    //     for (int j = 0; j < nFields; j++)
-    //     {
-    //         cout << PQfname(res, j) << ": " << PQgetvalue(res, i, j) << " | " << endl;
-    //         source.setField(PQfname(res, j), PQgetvalue(res, i, j));
-    //     }
-    //     sources.push_back(source);
-    //     cout << endl;
-    // }
-
-    // for (auto source : sources)
-    // {
-    //     cout << "ID: " << boost::uuids::to_string(source.ID) << endl;
-    //     cout << "Name: " << source.Name << endl;
-    //     cout << "Link: " << source.Link << endl;
-    //     cout << "Source Type ID: " << boost::uuids::to_string(source.SourceTypeID) << endl;
-    //     cout << "User ID: " << boost::uuids::to_string(source.UserId) << endl;
-    //     cout << endl;
-    // }
-
-    // PQclear(res);
-    PQfinish(conn);
     return 0;
 }

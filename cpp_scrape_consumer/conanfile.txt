@@ -2,6 +2,7 @@
 libpq/15.5
 sqlpp11/0.64
 boost/1.86.0
+nlohmann_json/3.11.3
 
 [generators]
 CMakeDeps
