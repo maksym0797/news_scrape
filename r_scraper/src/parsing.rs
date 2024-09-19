@@ -5,12 +5,16 @@ pub fn parse_html(html: &str) -> Vec<String> {
     let title_selector = Selector::parse(".pw-post-title").unwrap();
     let body_selector = Selector::parse(".pw-post-body-paragraph").unwrap();
 
-    document
+    let mut title = document
         .select(&title_selector)
-        .into_iter()
-        .map(|e| {
-            println!("{e:?}");
-            e.text().collect::<Vec<_>>().concat()
-        })
-        .collect::<Vec<_>>()
+        .map(|e| e.text().collect::<Vec<_>>().concat())
+        .collect::<Vec<_>>();
+
+    let body = document
+        .select(&body_selector)
+        .map(|e| e.text().collect::<Vec<_>>().concat());
+
+    title.extend(body);
+
+    title
 }

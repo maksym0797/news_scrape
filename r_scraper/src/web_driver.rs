@@ -1,11 +1,15 @@
 use reqwest::{
-    blocking::Client as BlockingClient,
     header::{HeaderMap, HeaderValue, ACCEPT, USER_AGENT},
+    Client,
 };
 
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use std::{collections::HashMap, time::Duration};
+use std::{
+    collections::{HashMap, VecDeque},
+    time::Duration,
+};
+use tokio::sync::{Mutex, Notify};
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct StatusResponse {
@@ -215,37 +219,37 @@ pub enum Browser {
 
 #[derive(Debug)]
 pub struct WebDriver {
-    client: BlockingClient,
-}
-
-impl Default for WebDriver {
-    fn default() -> Self {
-        Self {
-            client: BlockingClient::builder()
-                .timeout(Duration::from_secs(5))
-                .build()
-                .unwrap(),
-        }
-    }
+    client: Client,
+    driver_url: String,
 }
 
 #[derive(Debug, Clone)]
 pub struct WebDriverError(String);
 
-impl WebDriver {
-    pub fn status(&self) -> Result<StatusResponse, WebDriverError> {
-        let res = self
-            .client
-            .get("http://localhost:4444/wd/hub/status")
-            .send();
-
-        match res {
-            Ok(r) => Ok(r.json::<StatusResponse>().unwrap()),
-            Err(e) => Err(WebDriverError(e.to_string())),
+impl Default for WebDriver {
+    fn default() -> Self {
+        Self {
+            client: Client::builder()
+                .timeout(Duration::from_secs(5))
+                .build()
+                .unwrap(),
+            driver_url: "http://localhost:4444".to_string(),
         }
     }
+}
 
-    pub fn create_session(&self, browser: Browser) -> Result<String, WebDriverError> {
+impl WebDriver {
+    pub async fn status(&self) -> Result<StatusResponse, reqwest::Error> {
+        let res = self
+            .client
+            .get(format!("{}{}", self.driver_url, "/wd/hub/status"))
+            .send()
+            .await?;
+
+        res.json::<StatusResponse>().await
+    }
+
+    pub async fn create_session(&self, browser: Browser) -> Result<String, reqwest::Error> {
         let mut headers = HeaderMap::new();
         headers.insert(USER_AGENT, HeaderValue::from_static("reqwest"));
         headers.insert(ACCEPT, HeaderValue::from_static("application/json"));
@@ -263,49 +267,103 @@ impl WebDriver {
 
         let res = self
             .client
-            .post("http://localhost:4444/wd/hub/session")
+            .post(format!("{}{}", self.driver_url, "/wd/hub/session"))
             .headers(headers)
             .body(body.to_string())
-            .send();
+            .send()
+            .await?;
 
-        match res {
-            Ok(r) => {
-                // dbg!(&r.json::<serde_json::Value>().unwrap());
-                // unreachable!();
-                Ok(r.json::<CreateSessionResponse>().unwrap().value.session_id)
-            }
-            Err(e) => Err(WebDriverError(e.to_string())),
-        }
+        Ok(res.json::<CreateSessionResponse>().await?.value.session_id)
     }
 
-    pub fn navigate_to_url(&self, session_id: &str, url: &str) -> Result<(), WebDriverError> {
-        let res = self
-            .client
-            .post(&format!(
-                "http://localhost:4444/wd/hub/session/{}/url",
-                session_id
+    pub async fn navigate_to_url(&self, session_id: &str, url: &str) -> Result<(), reqwest::Error> {
+        self.client
+            .post(format!(
+                "{}{}{}{}",
+                self.driver_url, "/wd/hub/session/", session_id, "/url"
             ))
             .body(json!({"url": url}).to_string())
-            .send();
+            .send()
+            .await?;
 
-        match res {
-            Ok(_) => Ok(()),
-            Err(e) => Err(WebDriverError(e.to_string())),
+        Ok(())
+    }
+
+    pub async fn get_session_url_content(
+        &self,
+        session_id: &str,
+    ) -> Result<String, reqwest::Error> {
+        let res = self
+            .client
+            .get(format!(
+                "{}{}{}{}",
+                self.driver_url, "/wd/hub/session/", session_id, "/source"
+            ))
+            .send()
+            .await?;
+
+        let json = res.json::<serde_json::Value>().await?;
+        let html = json["value"].as_str().unwrap();
+        Ok(html.to_string())
+    }
+
+    pub async fn delete_session(&self, session_id: &str) -> Result<(), reqwest::Error> {
+        self.client
+            .delete(format!(
+                "{}{}{}",
+                self.driver_url, "/wd/hub/session/", session_id
+            ))
+            .send()
+            .await?;
+
+        Ok(())
+    }
+}
+
+#[derive(Debug)]
+pub struct SessionManager {
+    ids: Mutex<VecDeque<String>>,
+    notify: Notify,
+}
+
+impl Default for SessionManager {
+    fn default() -> Self {
+        Self {
+            ids: Mutex::new(VecDeque::new()),
+            notify: Notify::new(),
+        }
+    }
+}
+
+impl SessionManager {
+    pub async fn push(&self, session_id: String) {
+        self.ids.lock().await.push_back(session_id);
+    }
+
+    pub async fn aquire(&self) -> String {
+        loop {
+            let mut ids = self.ids.lock().await;
+
+            if let Some(id) = ids.pop_front() {
+                return id;
+            } else {
+                // I've heard there could be a deadlock condition so I'm dropping before notifying
+                drop(ids);
+                self.notify.notified().await;
+            }
         }
     }
 
-    pub fn get_session_url_content(&self, session_id: &str) -> Result<String, WebDriverError> {
-        let res = self
-            .client
-            .get(&format!(
-                "http://localhost:4444/wd/hub/session/{}/source",
-                session_id
-            ))
-            .send();
+    pub async fn release(&self, id: String) {
+        let mut ids = self.ids.lock().await;
+        println!("ID {} released", &id);
+        ids.push_back(id);
 
-        match res {
-            Ok(r) => Ok(r.text().unwrap()),
-            Err(e) => Err(WebDriverError(e.to_string())),
-        }
+        self.notify.notify_one();
+    }
+
+    pub async fn take(self) -> Vec<String> {
+        let mut ids = self.ids.lock().await;
+        ids.drain(..).collect()
     }
 }

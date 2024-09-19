@@ -7,9 +7,10 @@ import (
 
 type SourceType struct {
 	gorm.Model
-	ID   uuid.UUID `gorm:"type:uuid;"`
-	Name string    `json:"name"`
-	Link string    `json:"link"`
+	ID      uuid.UUID `gorm:"type:uuid;"`
+	Name    string    `json:"name"`
+	Link    string    `json:"link"`
+	IsEager bool      `json:"isEager"` // tells scraper the resource can just fetch raw html without js rendering
 }
 
 func (post *SourceType) BeforeCreate(tx *gorm.DB) (err error) {
