@@ -3,7 +3,7 @@ mod db;
 mod parsing;
 mod web_driver;
 
-use parsing::parse_html;
+use parsing::SourceParser;
 use std::{fmt::Display, sync::Arc, time::Duration};
 use tokio::task::JoinHandle;
 
@@ -74,10 +74,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
                     if !source.is_eager {
                         let response = client_ref.get(&url).send().await?;
-                        let body = response.text().await?;
+                        let content = response.text().await?;
                         Ok(ParsedResponse {
                             url,
-                            text: parse_html(&body),
+                            text: SourceParser::from(source.name.as_str()).parse(&content),
                         })
                     } else {
                         let session_id = session_manager_ref.aquire().await;
@@ -89,7 +89,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         session_manager_ref.release(session_id).await;
                         Ok(ParsedResponse {
                             url,
-                            text: parse_html(&content),
+                            text: SourceParser::from(source.name.as_str()).parse(&content),
                         })
                     }
                 }

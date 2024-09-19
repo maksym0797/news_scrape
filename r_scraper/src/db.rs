@@ -4,6 +4,7 @@ use sqlx::{types::Uuid, Pool, Postgres};
 pub struct UserSource {
     pub user_id: Uuid,
     pub link: String,
+    pub name: String,
     pub is_eager: bool,
 }
 
@@ -22,7 +23,7 @@ impl DB {
     }
 
     pub async fn get_sources(&self) -> Result<Vec<UserSource>, sqlx::Error> {
-        let rows = sqlx::query_as::<_, UserSource>("SELECT u.id as user_id, s.link as link, st.is_eager FROM users as u JOIN sources as s ON u.id = s.user_id JOIN source_types as st ON s.source_type_id = st.id")
+        let rows = sqlx::query_as::<_, UserSource>("SELECT u.id as user_id, s.link as link, st.is_eager, st.name as name FROM users as u JOIN sources as s ON u.id = s.user_id JOIN source_types as st ON s.source_type_id = st.id")
             .fetch_all(&self.pool)
             .await?;
 
