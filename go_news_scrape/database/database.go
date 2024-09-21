@@ -63,16 +63,19 @@ func Connect() {
 	db.Logger = logger.Default.LogMode(logger.Info)
 	log.Println("Running migrations")
 	if err := db.AutoMigrate(&model.User{}); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		log.Fatalf("Failed to run User migrations: %v", err)
 	}
 	if err := db.AutoMigrate(&model.Topic{}); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		log.Fatalf("Failed to run Topic migrations: %v", err)
 	}
 	if err := db.AutoMigrate(&model.Source{}); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		log.Fatalf("Failed to run Source migrations: %v", err)
 	}
 	if err := db.AutoMigrate(&model.Post{}); err != nil {
-		log.Fatalf("Failed to run migrations: %v", err)
+		log.Fatalf("Failed to run Post migrations: %v", err)
+	}
+	if err := db.AutoMigrate(&model.RawPost{}); err != nil {
+		log.Fatalf("Failed to run RawPost migrations: %v", err)
 	}
 
 	DB = DbInstance{

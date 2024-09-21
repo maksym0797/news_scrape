@@ -213,8 +213,8 @@ pub struct SessionCapabilities {
 }
 
 pub enum Browser {
-    CHROME,
-    FIREFOX,
+    Chrome,
+    Firefox,
 }
 
 #[derive(Debug)]
@@ -222,9 +222,6 @@ pub struct WebDriver {
     client: Client,
     driver_url: String,
 }
-
-#[derive(Debug, Clone)]
-pub struct WebDriverError(String);
 
 impl Default for WebDriver {
     fn default() -> Self {
@@ -258,8 +255,8 @@ impl WebDriver {
             "capabilities": {
                 "alwaysMatch": {
                     "browserName": match browser {
-                        Browser::CHROME => "chrome",
-                        Browser::FIREFOX => "firefox"
+                        Browser::Chrome => "chrome",
+                        Browser::Firefox => "firefox"
                     }
                 }
             }

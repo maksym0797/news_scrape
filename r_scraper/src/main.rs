@@ -58,7 +58,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         println!("Spawning {max_sessions} sessions");
         for _ in 0..max_sessions {
-            let session_id = driver.create_session(Browser::CHROME).await?;
+            let session_id = driver.create_session(Browser::Chrome).await?;
             println!("Created session with ID: {session_id}");
             session_manager.push(session_id).await;
         }
