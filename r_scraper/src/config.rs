@@ -22,14 +22,9 @@ impl ConfigLoader {
     }
 
     fn get_var(name: &str, is_required: bool) -> Option<String> {
-        let var = match is_required {
-            true => std::env::var(name)
-                .map(|v| ConfigLoader::validate_empty_string(&v))
-                .unwrap_or(None),
-            false => std::env::var(name)
-                .map(|v| ConfigLoader::validate_empty_string(&v))
-                .unwrap_or(None),
-        };
+        let var = std::env::var(name)
+            .map(|v| ConfigLoader::validate_empty_string(&v))
+            .unwrap_or(None);
 
         if is_required && var.is_none() {
             panic!("{} must be set", name);

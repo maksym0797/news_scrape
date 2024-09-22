@@ -25,10 +25,11 @@ docker run -d -p 4444:4444 -p 7900:7900 --shm-size="2g"  -e SE_NODE_MAX_SESSIONS
 `4444` port is for web driver
 `7900` is for VNC
 
-The `SE_NODE_MAX_SESSIONS` env param restricts a number of windows you can open at once
-And `SE_VNC_NO_PASSWORD` allows you to access VNC at url `http://localhost:7900` without password (the default btw is `secret`)
+`SE_NODE_MAX_SESSIONS` env param restricts a number of windows you can open at once
 
-### Building
+`SE_VNC_NO_PASSWORD` allows you to access VNC at url `http://localhost:7900` without password (the default btw is `secret`)
+
+## Building
 
 To do a debug run
 
