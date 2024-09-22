@@ -11,6 +11,9 @@ use std::{
 };
 use tokio::sync::{Mutex, Notify};
 
+use crate::info;
+
+const DEFAULT_DRIVER_URL: &str = "http://localhost:4444";
 #[derive(Debug, Deserialize, Serialize)]
 pub struct StatusResponse {
     pub value: Value,
@@ -212,6 +215,7 @@ pub struct SessionCapabilities {
     pub webauthn_virtual_authenticators: bool,
 }
 
+#[allow(dead_code)]
 pub enum Browser {
     Chrome,
     Firefox,
@@ -230,12 +234,24 @@ impl Default for WebDriver {
                 .timeout(Duration::from_secs(5))
                 .build()
                 .unwrap(),
-            driver_url: "http://localhost:4444".to_string(),
+            driver_url: DEFAULT_DRIVER_URL.to_string(),
         }
     }
 }
 
 impl WebDriver {
+    pub fn new(driver_url: Option<String>) -> Self {
+        Self {
+            client: Client::builder()
+                .timeout(Duration::from_secs(5))
+                .build()
+                .unwrap(),
+            driver_url: driver_url
+                .unwrap_or(String::from(DEFAULT_DRIVER_URL))
+                .to_string(),
+        }
+    }
+
     pub async fn status(&self) -> Result<StatusResponse, reqwest::Error> {
         let res = self
             .client
@@ -353,7 +369,7 @@ impl SessionManager {
 
     pub async fn release(&self, id: String) {
         let mut ids = self.ids.lock().await;
-        println!("ID {} released", &id);
+        info!("ID {} released", &id);
         ids.push_back(id);
 
         self.notify.notify_one();

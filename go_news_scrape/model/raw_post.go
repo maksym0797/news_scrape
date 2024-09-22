@@ -9,11 +9,14 @@ import (
 
 type RawPost struct {
 	gorm.Model
-	ID        uuid.UUID `gorm:"type:uuid;"`
-	Title     string    `json:"title"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created_at"`
-	UpdatedAt time.Time `json:"updated_at"`
+	ID          uuid.UUID `gorm:"type:uuid;"`
+	Title       string    `json:"title"`
+	Content     string    `json:"content"`
+	SourceID    uuid.UUID `json:"source_id"`
+	Source      Source    `json:"source" gorm:"foreignKey:SourceID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
+	PublishedAt time.Time `json:"published_at"`
+	CreatedAt   time.Time `json:"created_at"`
+	UpdatedAt   time.Time `json:"updated_at"`
 }
 
 func (post *RawPost) BeforeCreate(tx *gorm.DB) (err error) {
