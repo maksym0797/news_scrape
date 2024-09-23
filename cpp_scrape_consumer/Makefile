@@ -129,6 +129,78 @@ main/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
 .PHONY : main/fast
 
+src/config/config.o: src/config/config.cpp.o
+.PHONY : src/config/config.o
+
+# target to build an object file
+src/config/config.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/config/config.cpp.o
+.PHONY : src/config/config.cpp.o
+
+src/config/config.i: src/config/config.cpp.i
+.PHONY : src/config/config.i
+
+# target to preprocess a source file
+src/config/config.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/config/config.cpp.i
+.PHONY : src/config/config.cpp.i
+
+src/config/config.s: src/config/config.cpp.s
+.PHONY : src/config/config.s
+
+# target to generate assembly for a file
+src/config/config.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/config/config.cpp.s
+.PHONY : src/config/config.cpp.s
+
+src/db/postgres_client.o: src/db/postgres_client.cpp.o
+.PHONY : src/db/postgres_client.o
+
+# target to build an object file
+src/db/postgres_client.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/db/postgres_client.cpp.o
+.PHONY : src/db/postgres_client.cpp.o
+
+src/db/postgres_client.i: src/db/postgres_client.cpp.i
+.PHONY : src/db/postgres_client.i
+
+# target to preprocess a source file
+src/db/postgres_client.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/db/postgres_client.cpp.i
+.PHONY : src/db/postgres_client.cpp.i
+
+src/db/postgres_client.s: src/db/postgres_client.cpp.s
+.PHONY : src/db/postgres_client.s
+
+# target to generate assembly for a file
+src/db/postgres_client.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/db/postgres_client.cpp.s
+.PHONY : src/db/postgres_client.cpp.s
+
+src/http/http_client.o: src/http/http_client.cpp.o
+.PHONY : src/http/http_client.o
+
+# target to build an object file
+src/http/http_client.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/http/http_client.cpp.o
+.PHONY : src/http/http_client.cpp.o
+
+src/http/http_client.i: src/http/http_client.cpp.i
+.PHONY : src/http/http_client.i
+
+# target to preprocess a source file
+src/http/http_client.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/http/http_client.cpp.i
+.PHONY : src/http/http_client.cpp.i
+
+src/http/http_client.s: src/http/http_client.cpp.s
+.PHONY : src/http/http_client.s
+
+# target to generate assembly for a file
+src/http/http_client.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/http/http_client.cpp.s
+.PHONY : src/http/http_client.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -153,6 +225,30 @@ src/main.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/main.cpp.s
 .PHONY : src/main.cpp.s
 
+src/reader/input_reader.o: src/reader/input_reader.cpp.o
+.PHONY : src/reader/input_reader.o
+
+# target to build an object file
+src/reader/input_reader.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/reader/input_reader.cpp.o
+.PHONY : src/reader/input_reader.cpp.o
+
+src/reader/input_reader.i: src/reader/input_reader.cpp.i
+.PHONY : src/reader/input_reader.i
+
+# target to preprocess a source file
+src/reader/input_reader.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/reader/input_reader.cpp.i
+.PHONY : src/reader/input_reader.cpp.i
+
+src/reader/input_reader.s: src/reader/input_reader.cpp.s
+.PHONY : src/reader/input_reader.s
+
+# target to generate assembly for a file
+src/reader/input_reader.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/src/reader/input_reader.cpp.s
+.PHONY : src/reader/input_reader.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -162,9 +258,21 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... main"
+	@echo "... src/config/config.o"
+	@echo "... src/config/config.i"
+	@echo "... src/config/config.s"
+	@echo "... src/db/postgres_client.o"
+	@echo "... src/db/postgres_client.i"
+	@echo "... src/db/postgres_client.s"
+	@echo "... src/http/http_client.o"
+	@echo "... src/http/http_client.i"
+	@echo "... src/http/http_client.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
+	@echo "... src/reader/input_reader.o"
+	@echo "... src/reader/input_reader.i"
+	@echo "... src/reader/input_reader.s"
 .PHONY : help
 
 

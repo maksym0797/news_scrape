@@ -1,8 +1,5 @@
 #include <libpq-fe.h>
 #include <iostream>
-#include <fstream>
-#include <sstream>
-#include <string>
 #include <map>
 #include <chrono>
 #include <vector>
@@ -41,20 +38,14 @@ struct Source
         {
             SourceTypeID = boost::uuids::string_generator()(value);
         }
-        else if (strcmp(name, "user_id") == 0)
-        {
-            UserId = boost::uuids::string_generator()(value);
-        }
     }
 };
-
-using namespace std;
 
 int main()
 {
     Config config("../../.env");
     config.init();
-    cout << "DB_CONNINFO: " << config.get("DB_CONNINFO") << endl;
+    std::cout << "DB_CONNINFO: " << config.get("DB_CONNINFO") << std::endl;
 
     PostgresClient client(config);
 
@@ -62,7 +53,7 @@ int main()
 
     std::vector<InputPost> posts = reader.read();
 
-    cout << "Hello, World!" << endl;
+    std::cout << "Hello, World!" << std::endl;
 
     for (auto post : posts)
     {
