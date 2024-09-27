@@ -44,6 +44,8 @@ nlohmann::json HttpClient::make_request(const std::string &path, const std::stri
 
         // Create a resolver to turn the host into an IP address
         tcp::resolver resolver(ioc);
+
+        std::cout << "http-host: " << host << " port: " << port << " path: " << path << std::endl;
         auto const results = resolver.resolve(host, port);
 
         // Set up a TCP socket
@@ -51,7 +53,7 @@ nlohmann::json HttpClient::make_request(const std::string &path, const std::stri
         stream.connect(results);
 
         // Set up an HTTP POST request
-        http::request<http::string_body> req{http::verb::post, path, 11};
+        http::request<http::string_body> req{method == "GET" ? http::verb::get : http::verb::post, path, 11};
         req.set(http::field::host, host);
         req.set(http::field::user_agent, BOOST_BEAST_VERSION_STRING);
         req.set(http::field::content_type, "application/json");

@@ -6,6 +6,9 @@
 #include <vector>
 #include <libpq-fe.h>
 #include <boost/uuid/uuid.hpp>
+#include <boost/uuid/string_generator.hpp> // For string_generator
+#include <boost/uuid/uuid_serialize.hpp>   // For string_generator
+#include <boost/uuid/uuid_io.hpp>          // For to_string
 
 struct InputPost
 {
@@ -16,6 +19,35 @@ struct InputPost
     std::string Link;
     std::chrono::system_clock::time_point CreatedAt;
     std::chrono::system_clock::time_point UpdatedAt;
+};
+
+struct Source
+{
+    boost::uuids::uuid ID;
+    std::string Name;
+    std::string Link;
+    boost::uuids::uuid SourceTypeID;
+    boost::uuids::uuid UserId;
+
+    void setField(char *name, char *value)
+    {
+        if (strcmp(name, "id") == 0)
+        {
+            ID = boost::uuids::string_generator()(value);
+        }
+        else if (strcmp(name, "name") == 0)
+        {
+            Name = value;
+        }
+        else if (strcmp(name, "link") == 0)
+        {
+            Link = value;
+        }
+        else if (strcmp(name, "source_type_id") == 0)
+        {
+            SourceTypeID = boost::uuids::string_generator()(value);
+        }
+    }
 };
 
 class InputReader
@@ -32,6 +64,7 @@ public:
     {
     }
     std::vector<InputPost> read();
+    std::vector<Source> getSourcesByIds(std::string source_ids);
     InputPost hydratePost(PGresult *res, int nFields, int i);
 
 private:

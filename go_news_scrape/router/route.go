@@ -22,4 +22,8 @@ func SetupRoutes(app *fiber.App) {
 	sourceAPI.Post("/", middleware.BasicAuthMiddleware, handler.AddUserSource)
 	sourceAPI.Delete("/:sourceId", middleware.BasicAuthMiddleware, handler.RemoveUserSource)
 	sourceAPI.Get("/types", handler.GetSourceTypes)
+
+	postAPI := api.Group("/raw_post")
+
+	postAPI.Get("/id/:id", handler.GetSinglePost)
 }
