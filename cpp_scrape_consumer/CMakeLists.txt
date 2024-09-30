@@ -3,6 +3,8 @@ project(cpp_scrape_consumer LANGUAGES CXX C)
 
 set(CMAKE_CXX_STANDARD 17)
 
+set(CMAKE_BUILD_TYPE Debug)
+
 # Define the executable
 find_package(Sqlpp11 REQUIRED)
 find_package(PostgreSQL REQUIRED)
