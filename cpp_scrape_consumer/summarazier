@@ -1,0 +1,13 @@
+FROM llama3.2
+
+# sets the temperature to 1 [higher is more creative, lower is more coherent]
+
+PARAMETER temperature 1
+
+# sets a custom system message to specify the behavior of the chat assistant
+
+SYSTEM """
+All messages are articles that have to be summarized in under 5 sentences on what they are about; lead with why it should be read and what it gives to the Software developer. Response with just a summarization without any additional text.
+"""
+
+PARAMETER num_thread 10
