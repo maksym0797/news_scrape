@@ -1,5 +1,3 @@
-#![feature(slice_partition_dedup)]
-
 mod config;
 mod db;
 mod logger;
