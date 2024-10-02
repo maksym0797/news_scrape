@@ -1,3 +1,5 @@
+#![feature(slice_partition_dedup)]
+
 mod config;
 mod db;
 mod logger;
@@ -5,11 +7,10 @@ mod parsing;
 mod web_driver;
 
 use db::{RawPost, DB};
+
 use parsing::SourceParser;
-use sqlx::types::chrono;
 use std::{sync::Arc, time::Duration};
 use tokio::task::JoinHandle;
-use uuid::Uuid;
 
 use web_driver::{Browser, SessionManager, WebDriver};
 
@@ -52,6 +53,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
 
         for source in user_sources {
+            info!("Will spawn thread to process source: {}", source.link);
             tasks.push(tokio::spawn({
                 let client_ref = client.clone();
                 let driver_ref = driver.clone();
@@ -64,31 +66,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                         let response = client_ref.get(&url).send().await?;
                         let content = response.text().await?;
                         let parse_result = SourceParser::from(source.name.as_str()).parse(&content);
-                        Ok(RawPost {
-                            id: Uuid::new_v4(),
-                            source_id: source.source_id,
-                            title: parse_result.title,
-                            content: parse_result.content.unwrap_or_else(|| "".to_string()),
-                            published_at: chrono::Utc::now(),
-                        })
-                    } else {
-                        let session_id = session_manager_ref.aquire().await;
-                        info!("Task for {} is using ID {}", &url, &session_id);
-
-                        driver_ref.navigate_to_url(&session_id, &url).await?;
-                        let content = driver_ref.get_session_url_content(&session_id).await?;
-
-                        session_manager_ref.release(session_id).await;
-                        let parse_result = SourceParser::from(source.name.as_str()).parse(&content);
-
-                        Ok(RawPost {
-                            id: Uuid::new_v4(),
-                            source_id: source.source_id,
-                            title: parse_result.title,
-                            content: parse_result.content.unwrap_or_else(|| "".to_string()),
-                            published_at: chrono::Utc::now(),
-                        })
+                        return Ok(RawPost::new(
+                            source.source_id,
+                            parse_result.title,
+                            parse_result.content,
+                            None,
+                        ));
                     }
+
+                    let session_id = session_manager_ref.aquire().await;
+                    info!("Task for {} is using ID {}", &url, &session_id);
+
+                    driver_ref.navigate_to_url(&session_id, &url).await?;
+                    let content = driver_ref.get_session_url_content(&session_id).await?;
+
+                    session_manager_ref.release(session_id).await;
+                    let parse_result = SourceParser::from(source.name.as_str()).parse(&content);
+
+                    Ok(RawPost::new(
+                        source.source_id,
+                        parse_result.title,
+                        parse_result.content,
+                        None,
+                    ))
                 }
             }));
         }

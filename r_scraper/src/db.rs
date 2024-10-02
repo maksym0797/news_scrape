@@ -1,26 +1,12 @@
+mod raw_post;
+mod source;
+
 use std::result::Result;
 
-use sqlx::{
-    types::{chrono, Uuid},
-    Pool, Postgres,
-};
+use sqlx::{types::chrono, Pool, Postgres};
 
-#[derive(sqlx::FromRow, Debug)]
-pub struct Source {
-    pub source_id: Uuid,
-    pub link: String,
-    pub name: String,
-    pub is_eager: bool,
-}
-
-#[derive(Debug)]
-pub struct RawPost {
-    pub id: Uuid,
-    pub source_id: Uuid,
-    pub title: String,
-    pub content: String,
-    pub published_at: chrono::DateTime<chrono::Utc>,
-}
+pub use raw_post::RawPost;
+pub use source::Source;
 
 pub struct DB {
     pool: Pool<Postgres>,
@@ -37,7 +23,7 @@ impl DB {
     }
 
     pub async fn get_sources(&self) -> Result<Vec<Source>, sqlx::Error> {
-        let rows = sqlx::query_as::<_, Source>("SELECT s.link as link, s.id as source_id, st.is_eager, st.name as name FROM sources as s JOIN source_types as st ON s.source_type_id = st.id")
+        let rows = sqlx::query_as::<_, Source>("SELECT distinct on(s.link) s.link as link, s.id as source_id, st.is_eager, st.name as name FROM sources as s JOIN source_types as st ON s.source_type_id = st.id order by s.link")
             .fetch_all(&self.pool)
             .await?;
 
